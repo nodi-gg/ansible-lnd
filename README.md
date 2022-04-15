@@ -24,11 +24,13 @@ Example Playbook
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
+````
   - hosts: lnd
     roles:
       - role: gantsign.golang
         golang_gopath: '$HOME/workspace-go'
       - nodi.lnd
+````
 
 License
 -------

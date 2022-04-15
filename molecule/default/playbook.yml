@@ -1,0 +1,7 @@
+---
+- hosts: all
+  any_errors_fatal: true
+  roles:
+    - role: gantsign.golang
+      golang_gopath: '$HOME/workspace-go'
+    - nodi.lnd

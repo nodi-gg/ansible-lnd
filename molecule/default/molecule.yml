@@ -1,0 +1,27 @@
+---
+dependency:
+  name: galaxy
+  options:
+      role-file: requirements.yml
+driver:
+  name: docker
+platforms:
+  - name: bullseye
+    pre_build_image: true
+    image: dsbaars/molecule-images:debian-bullseye
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: focal
+    pre_build_image: true
+    image: dsbaars/molecule-images:ubuntu-focal
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+provisioner:
+  name: ansible
+  playbooks:
+    prepare: prepare.yml
+    converge: playbook.yml
+verifier:
+  name: ansible

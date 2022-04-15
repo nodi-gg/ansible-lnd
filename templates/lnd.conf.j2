@@ -1,0 +1,25 @@
+[Application Options]
+datadir={{ lnd_data_dir }}/data
+logdir={{ lnd_log_dir }}
+
+; [db]
+; db.backend=bolt
+
+; [bolt]
+; db.bolt.auto-compact=true
+; db.bolt.auto-compact-min-age=0
+
+; [Bitcoin]
+; bitcoin.active=1
+; bitcoin.node=neutrino
+; bitcoin.testnet=1
+
+; [neutrino]
+; neutrino.addpeer=btcd-testnet.lightning.computer
+; neutrino.addpeer=lnd.bitrefill.com:18333
+; neutrino.addpeer=faucet.lightning.community
+; neutrino.addpeer=testnet1-btcd.zaphq.io
+; neutrino.addpeer=testnet2-btcd.zaphq.io
+; neutrino.addpeer=testnet3-btcd.zaphq.io
+; neutrino.addpeer=testnet4-btcd.zaphq.io
+; neutrino.feeurl=https://nodes.lightning.computer/fees/v1/btctestnet-fee-estimates.json

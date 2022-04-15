@@ -1,0 +1,102 @@
+---
+# tasks file for lnd
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Update all packages to their latest version
+  apt:
+    name: "*"
+    state: latest
+
+- name: lnd install required dependencies
+  ansible.builtin.package:
+    name: "{{ lnd_deps }}"
+    state: latest
+
+- name: check lncli executable is present in PATH
+  shell: "which lncli"
+  register: lncli_exists
+  ignore_errors: true
+
+- name: lnd git checkout
+  ansible.builtin.git:
+    repo: 'https://github.com/lightningnetwork/lnd'
+    dest: "{{ lnd_src_dir }}"
+    version: "{{ lnd_branch }}"
+  when: lncli_exists.rc != 0
+
+- name: lnd compile
+  command: "make {{ lnd_make_params }}"
+  args:
+    chdir: "{{ lnd_src_dir }}"
+  when: lncli_exists.rc != 0
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_local.golang.general.home }}/bin"
+
+- name: lnd install
+  command: "make install"
+  args:
+    chdir: "{{ lnd_src_dir }}"
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_local.golang.general.home }}/bin"
+    GOBIN: "{{ lnd_install_path }}"
+  when: lncli_exists.rc != 0
+
+# - name: lnd copy binaries 
+#   ansible.builtin.copy:
+#     src: "{{ item.srcfile }}"
+#     dest: "{{ item.dstfile }}"
+#     remote_src: yes
+#     force: no
+#   loop:
+#     - { srcfile: "{{ lnd_src_dir }}/cmd/lnd", dstfile: "{{ lnd_install_path }}/lnd" }
+#     - { srcfile: "{{ lnd_src_dir }}/cmd/lncli", dstfile: "{{ lnd_install_path }}/lncli" }
+
+- name: create lnd system group
+  group:
+    name: "{{ lnd_group }}"
+    system: true
+    state: present
+
+
+- name: create lnd system user
+  user:
+    name: "{{ lnd_user }}"
+    system: true
+    shell: "/usr/sbin/nologin"
+    group: "{{ lnd_group }}"
+    createhome: false
+    home: "{{ lnd_data_dir }}"
+
+- name: create lnd data directory
+  file:
+    path: "{{ lnd_data_dir }}"
+    state: directory
+    owner: "{{ lnd_user }}"
+    group: "{{ lnd_group }}"
+    mode: 0755
+
+- name: create lnd log directory
+  file:
+    path: "{{ lnd_log_dir }}"
+    state: directory
+    owner: "{{ lnd_user }}"
+    group: "{{ lnd_group }}"
+    mode: 0755
+
+- name: install lnd systemd unit file
+  template: src=lnd.service.j2 dest=/etc/systemd/system/lnd.service
+
+- name: install lnd.conf
+  template: 
+    src: lnd.conf.j2 
+    dest: /etc/lnd.conf
+    owner: "{{ lnd_user }}"
+    group: "{{ lnd_group }}"
+
+- name: ensure lnd service is started and enabled
+  systemd:
+    daemon_reload: true
+    name: lnd
+    state: started
+    enabled: true

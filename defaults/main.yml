@@ -1,0 +1,20 @@
+---
+# defaults file for lnd
+lnd_src_dir: /opt/src/lnd
+lnd_install_path: /usr/local/bin
+lnd_data_dir: /var/lib/lnd
+lnd_log_dir: /var/log/lnd
+lnd_config: /etc/lnd.conf
+
+lnd_branch: v0.14.2-beta
+
+lnd_deps:
+  - git-core
+  - build-essential 
+
+lnd_make_params: -j4
+
+lnd_user: lnd
+lnd_group: lnd
+
+lnd_wait_for_bitcoind: false
